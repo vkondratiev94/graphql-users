@@ -22,7 +22,7 @@ const UserType = new GraphQLObjectType({
       type: CompanyType,
       resolve(parentValue, args) {
         /**
-         * parentValue is a user, with populated companyId property
+         * parentValue is a user instance, with populated companyId property (instead of company)
          * by which you can grab company data
          */
 
@@ -53,20 +53,43 @@ const RootQuery = new GraphQLObjectType({
           .then((res) => res.data);
       },
     },
+    /**
+     * Try to run next query in GraphiQL:
+      {
+        user(id: "23") {
+          id,
+          firstName,
+          age,
+          company {
+            id,
+            name,
+            description
+          }
+        }
+      }
+    */
+    company: {
+      type: CompanyType,
+      args: { id: { type: GraphQLString } },
+      resolve(parentValue, args) {
+        return axios
+          .get(`http://localhost:3000/companies/${args.id}`)
+          .then((res) => res.data);
+      },
+    },
+    /**
+     * Try to run next query in GraphiQL:
+      {
+        company (id: "1") {
+          id,
+          name,
+          description
+        }
+      }
+    */
   },
 });
 
 module.exports = new GraphQLSchema({
   query: RootQuery,
 });
-
-/**
- * Try to run next query in GraphiQL:
-  {
-    user(id: "23") {
-      id,
-      firstName,
-      age
-    }
-  }
- */
